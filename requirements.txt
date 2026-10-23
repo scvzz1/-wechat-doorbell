@@ -1,0 +1,9 @@
+# Versions matter here — several of these were pinned after live debugging.
+aiohttp>=3.9
+pycryptodome>=3.20
+qrcode[pil]>=7.4
+pilk==0.2.4            # WeChat SILK codec (voice messages)
+faster-whisper==1.2.1  # inbound voice transcription (local, offline)
+av==12.3.0             # MUST stay 12.x: faster-whisper's audio loader passes
+                       # metadata_errors= to av.open(); PyAV >=13 removed it
+                       # and transcription crashes with a TypeError.
