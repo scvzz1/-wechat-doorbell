@@ -1,0 +1,23 @@
+# Runtime data — never commit
+inbox.jsonl
+sent.jsonl
+status.json
+history/
+media/
+models/
+*.log
+reply-*.txt
+qr.png
+qr_url.txt
+login_status.log
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Brain state
+brains/.brain_*_state
+brains/history.json
+brains/persona.md
