@@ -31,6 +31,7 @@ from weixin_bot import WeixinBot
 HERE = Path(__file__).parent
 INBOX = HERE / "inbox.jsonl"
 MEDIA_DIR = HERE / "media"
+FILES_IN_DIR = HERE / "files-in"  # inbound files land here as agent work files
 MEDIA_DIR.mkdir(exist_ok=True)
 STATUS = HERE / "status.json"
 CREDS_FILE = Path.home() / ".weixin-bot" / "credentials.json"
@@ -167,11 +168,26 @@ async def fetch_media(msg_id: str, raw: dict) -> list[dict]:
         try:
             data = await download_decrypt(param, key)
             ext = sniff_ext(data) if kind == "image" else ".bin"
-            if kind == "file" and sub.get("file_name"):
-                ext = Path(sub["file_name"]).suffix or ext
-            path = MEDIA_DIR / f"{msg_id}-{idx}{ext}"
+            entry_name = None
+            if kind == "file":
+                # Inbound files are work files for the agent: keep the
+                # original filename and park them in files-in/.
+                raw_name = (sub.get("file_name") or "").strip()
+                safe = "".join(c for c in raw_name if c not in '\\/:*?"<>|').strip()
+                FILES_IN_DIR.mkdir(exist_ok=True)
+                if safe:
+                    path = FILES_IN_DIR / safe
+                    if path.exists():
+                        path = FILES_IN_DIR / f"{msg_id}-{safe}"
+                else:
+                    path = FILES_IN_DIR / f"{msg_id}-{idx}{ext}"
+                entry_name = path.name
+            else:
+                path = MEDIA_DIR / f"{msg_id}-{idx}{ext}"
             path.write_bytes(data)
             entry = {"kind": kind, "ok": True, "path": str(path), "bytes": len(data)}
+            if entry_name:
+                entry["name"] = entry_name
             if kind == "voice":
                 transcript = await transcribe_voice(path)
                 if transcript:
