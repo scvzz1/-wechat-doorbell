@@ -16,10 +16,13 @@ sys.path.insert(0, str(HERE / "weixin-bot" / "python"))
 from weixin_bot.api import build_text_message, send_message
 from weixin_bot.auth import load_credentials
 
+from text_filter import filter_markdown
+
 
 async def main() -> int:
     msg_id, reply_path = sys.argv[1], Path(sys.argv[2])
-    text = reply_path.read_text(encoding="utf-8").strip()
+    # WeChat renders no Markdown — downgrade syntax to plain text first.
+    text = filter_markdown(reply_path.read_text(encoding="utf-8").strip())
     if not text:
         print("empty reply, abort", file=sys.stderr)
         return 2
