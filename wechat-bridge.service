@@ -1,0 +1,19 @@
+[Unit]
+Description=WeChat doorbell bridge daemon (iLink -> inbox.jsonl)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# EDIT THESE PATHS to where you cloned this repo.
+WorkingDirectory=/opt/wechat-doorbell
+ExecStart=/opt/wechat-doorbell/venv/bin/python /opt/wechat-doorbell/bridge_bot.py
+Restart=on-failure
+RestartSec=15
+Environment=PYTHONUNBUFFERED=1
+# Optional: only needed when the host must reach the internet via a proxy
+# that aiohttp should honor (variables like HTTPS_PROXY in that file).
+# EnvironmentFile=-/home/you/.weixin-bot/proxy.env
+
+[Install]
+WantedBy=multi-user.target
